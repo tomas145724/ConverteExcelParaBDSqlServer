@@ -6,7 +6,14 @@ class ExcelToDBConverter:
         import pandas as pd
         
         # Read the Excel file
-        df = pd.read_excel(excel_file)
+        # df = pd.read_excel(excel_file)
+        df = pd.read_excel(excel_file, dtype=str)
 
         # Write the DataFrame to the specified database table
-        df.to_sql(table_name, con=self.engine, if_exists='replace', index=False)
+        #df.to_sql(table_name, con=self.engine, if_exists='replace', index=False)
+        df.to_sql(
+            table_name,
+            con=self.engine,
+            if_exists='replace',
+            index=False
+        )
