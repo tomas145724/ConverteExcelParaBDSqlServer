@@ -3,10 +3,10 @@ import pandas as pd
 from tkinter import filedialog, messagebox, scrolledtext
 from sqlalchemy import create_engine
 import os
+from sqlalchemy.types import NVARCHAR
 
 
-
-
+#python -m PyInstaller --onefile --windowed main.py
 
 # Configuração do tema da interface
 ctk.set_appearance_mode("System")
@@ -53,12 +53,39 @@ def importar_arquivos():
 
         for i, arquivo in enumerate(arquivos):
             log(f"Processando arquivo: {arquivo}")
-            df = pd.read_excel(arquivo, header=header_row)  # Use a linha escolhida como cabeçalho
+
+            df = pd.read_excel(
+                arquivo,
+                header=header_row,
+                dtype=str,
+                keep_default_na=False
+            )
+            #df = pd.read_excel(arquivo, header=header_row)  # Use a linha escolhida como cabeçalho
+            df = df.fillna("")    
+            log(str(df.dtypes))
+
+            for coluna in df.columns:
+                maior = df[coluna].astype(str).str.len().max()
+                log(f"{coluna} -> {df[coluna].dtype} | maior tamanho = {maior}")
+
 
             table_name = os.path.splitext(os.path.basename(arquivo))[0]
             log(f"Importando dados para a tabela: {table_name}")
 
-            df.to_sql(table_name, con=engine, if_exists='replace', index=False)
+            tipos = {}
+            for coluna in df.columns:
+                tipos[coluna] = NVARCHAR(length=4000)
+
+            df.to_sql(
+                table_name,
+                con=engine,
+                if_exists='replace',
+                index=False,
+                dtype=tipos
+            )
+
+
+            #df.to_sql(table_name, con=engine, if_exists='replace', index=False)
             #log(f"Arquivo {arquivo} está sendo importado!")
 
             total_linhas = len(df)
